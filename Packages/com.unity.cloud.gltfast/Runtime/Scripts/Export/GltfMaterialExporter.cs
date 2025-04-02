@@ -75,7 +75,7 @@ namespace GLTFast.Export
             GLTFast.Schema.Material material,
             Material unityMaterial)
         {
-            if (TryGetValue(unityMaterial, MaterialProperty.BaseColorTexture, out Texture2D texture2D))
+            if (TryGetValue(unityMaterial, Shader.PropertyToID(MaterialProperty.BaseColorTexture), out Texture2D texture2D))
             {
                 if (MaterialExport.AddImageExport(gltf, new ImageExport(texture2D), out var textureId))
                 {
@@ -118,7 +118,7 @@ namespace GLTFast.Export
             GLTFast.Schema.Material material,
             Material unityMaterial)
         {
-            if (TryGetValue(unityMaterial, MaterialProperty.MetallicRoughnessMap, out Texture2D texture2D)
+            if (TryGetValue(unityMaterial, Shader.PropertyToID(MaterialProperty.MetallicRoughnessMap), out Texture2D texture2D)
                 && MaterialExport.AddImageExport(gltf, new ImageExport(texture2D), out var textureId))
             {
                 var textureInfo = new TextureInfo
@@ -162,7 +162,7 @@ namespace GLTFast.Export
             GLTFast.Schema.Material material,
             Material unityMaterial)
         {
-            if (!TryGetValue(unityMaterial, MaterialProperty.NormalTexture, out Texture2D texture2D))
+            if (!TryGetValue(unityMaterial, Shader.PropertyToID(MaterialProperty.NormalTexture), out Texture2D texture2D))
             {
                 return material;
             }
@@ -204,7 +204,7 @@ namespace GLTFast.Export
             GLTFast.Schema.Material material,
             Material unityMaterial)
         {
-            if (!TryGetValue(unityMaterial, MaterialProperty.OcclusionTexture, out Texture2D texture2D))
+            if (!TryGetValue(unityMaterial, Shader.PropertyToID(MaterialProperty.OcclusionTexture), out Texture2D texture2D))
             {
                 return material;
             }
@@ -246,7 +246,7 @@ namespace GLTFast.Export
             GLTFast.Schema.Material material,
             Material unityMaterial)
         {
-            if (TryGetValue(unityMaterial, MaterialProperty.EmissiveTexture, out Texture2D texture2D))
+            if (TryGetValue(unityMaterial, Shader.PropertyToID(MaterialProperty.EmissiveTexture), out Texture2D texture2D))
             {
                 if (MaterialExport.AddImageExport(gltf, new ImageExport(texture2D), out var textureId))
                 {

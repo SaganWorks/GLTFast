@@ -70,21 +70,21 @@ namespace GLTFast.Materials {
         // ReSharper disable MemberCanBePrivate.Global
         // ReSharper disable MemberCanBeProtected.Global
 
-#if UNITY_EDITOR
-        /// <summary>GUID of the shader graph used for PBR metallic/roughness materials</summary>
-        const string k_MetallicShaderGuid = "b9d29dfa1474148e792ac720cbd45122";
-        /// <summary>GUID of the shader graph used for unlit materials</summary>
-        const string k_UnlitShaderGuid = "c87047c884d9843f5b0f4cce282aa760";
-        /// <summary>GUID of the shader graph used for PBR specular/glossiness materials</summary>
-        const string k_SpecularShaderGuid = "9a07dad0f3c4e43ff8312e3b5fa42300";
-#endif
+//#if UNITY_EDITOR
+//        /// <summary>GUID of the shader graph used for PBR metallic/roughness materials</summary>
+//        const string k_MetallicShaderGuid = "b9d29dfa1474148e792ac720cbd45122";
+//        /// <summary>GUID of the shader graph used for unlit materials</summary>
+//        const string k_UnlitShaderGuid = "c87047c884d9843f5b0f4cce282aa760";
+//        /// <summary>GUID of the shader graph used for PBR specular/glossiness materials</summary>
+//        const string k_SpecularShaderGuid = "9a07dad0f3c4e43ff8312e3b5fa42300";
+//#endif
 
         /// <summary>Name of the shader graph used for PBR metallic/roughness materials</summary>
-        public const string MetallicShader = "glTF-pbrMetallicRoughness";
+        public const string MetallicShader = "Shader_ModelImport";
         /// <summary>Name of the shader graph used for unlit materials</summary>
-        public const string UnlitShader = "glTF-unlit";
+        public const string UnlitShader = "Shader_ModelImport";
         /// <summary>Name of the shader graph used for PBR specular/glossiness materials</summary>
-        public const string SpecularShader = "glTF-pbrSpecularGlossiness";
+        public const string SpecularShader = "Shader_ModelImport";
 
         /// <summary>MotionVector shader tag name</summary>
         public const string MotionVectorTag = "MotionVector";
@@ -110,7 +110,7 @@ namespace GLTFast.Materials {
         const string k_OcclusionKeyword = "_OCCLUSION";
         const string k_EmissiveKeyword = "_EMISSIVE";
 
-        static readonly int k_BaseMapPropId = Shader.PropertyToID("baseColorTexture");
+        static readonly string k_BaseMapPropId = "_baseColorTexture";
         static readonly int k_BaseMapScaleTransformPropId = Shader.PropertyToID("baseColorTexture_ST"); //TODO: support in shader!
         static readonly int k_BaseMapRotationPropId = Shader.PropertyToID("baseColorTexture_Rotation"); //TODO; support in shader!
         static readonly int k_BaseMapUVChannelPropId = Shader.PropertyToID("baseColorTexture_texCoord"); //TODO; support in shader!
@@ -119,7 +119,7 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property transmissionFactor</summary>
         public static readonly int TransmissionFactorProperty = Shader.PropertyToID("transmissionFactor");
         /// <summary>Shader property ID for property transmissionTexture</summary>
-        public static readonly int TransmissionTextureProperty = Shader.PropertyToID("transmissionTexture");
+        public static readonly string TransmissionTextureProperty = "transmissionTexture";
         // ReSharper restore MemberCanBeProtected.Global
 
         // /// <summary>Shader property ID for property transmissionTexture_texCoord</summary>
@@ -132,7 +132,7 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property clearcoatFactor</summary>
         public static readonly int ClearcoatProperty = Shader.PropertyToID("clearcoatFactor");
         /// <summary>Shader property ID for property clearcoatTexture</summary>
-        public static readonly int ClearcoatTextureProperty = Shader.PropertyToID("clearcoatTexture");
+        public static readonly string ClearcoatTextureProperty = "clearcoatTexture";
         /// <summary>Shader property ID for property clearcoatTexture_ST</summary>
         public static readonly int ClearcoatTextureScaleTransformProperty = Shader.PropertyToID("clearcoatTexture_ST");
         /// <summary>Shader property ID for property clearcoatTexture_Rotation</summary>
@@ -142,7 +142,7 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property clearcoatRoughnessFactor</summary>
         public static readonly int ClearcoatRoughnessProperty = Shader.PropertyToID("clearcoatRoughnessFactor");
         /// <summary>Shader property ID for property clearcoatRoughnessTexture</summary>
-        public static readonly int ClearcoatRoughnessTextureProperty = Shader.PropertyToID("clearcoatRoughnessTexture");
+        public static readonly string ClearcoatRoughnessTextureProperty = "clearcoatRoughnessTexture";
         /// <summary>Shader property ID for property clearcoatRoughnessTexture_ST</summary>
         public static readonly int ClearcoatRoughnessTextureScaleTransformProperty = Shader.PropertyToID("clearcoatRoughnessTexture_ST");
         /// <summary>Shader property ID for property clearcoatRoughnessTexture_Rotation</summary>
@@ -150,7 +150,7 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property clearcoatRoughnessTexture_texCoord</summary>
         public static readonly int ClearcoatRoughnessTextureTexCoordProperty = Shader.PropertyToID("clearcoatRoughnessTexture_texCoord");
         /// <summary>Shader property ID for property clearcoatNormalTexture</summary>
-        public static readonly int ClearcoatNormalTextureProperty = Shader.PropertyToID("clearcoatNormalTexture");
+        public static readonly string ClearcoatNormalTextureProperty = "clearcoatNormalTexture";
         /// <summary>Shader property ID for property clearcoatNormalTexture_Scale</summary>
         public static readonly int ClearcoatNormalTextureScaleProperty = Shader.PropertyToID("clearcoatNormalTexture_Scale");
         /// <summary>Shader property ID for property clearcoatNormalTexture_ST</summary>
@@ -514,11 +514,8 @@ namespace GLTFast.Materials {
         {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
             if (!s_MetallicShaderQueried) {
-#if UNITY_EDITOR
-                s_MetallicShader = LoadShaderByGuid(new GUID(k_MetallicShaderGuid));
-#else
+
                 s_MetallicShader = LoadShaderByName(MetallicShader);
-#endif
                 s_MetallicShaderQueried = true;
             }
             return s_MetallicShader;
@@ -535,11 +532,7 @@ namespace GLTFast.Materials {
         Shader GetUnlitShader(MaterialBase gltfMaterial) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
             if (!s_UnlitShaderQueried) {
-#if UNITY_EDITOR
-                s_UnlitShader = LoadShaderByGuid(new GUID(k_UnlitShaderGuid));
-#else
                 s_UnlitShader = LoadShaderByName(UnlitShader);
-#endif
                 s_UnlitShaderQueried = true;
             }
             return s_UnlitShader;
@@ -558,11 +551,7 @@ namespace GLTFast.Materials {
         Shader GetSpecularShader(SpecularShaderFeatures features) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
             if (!s_SpecularShaderQueried) {
-#if UNITY_EDITOR
-                s_SpecularShader = LoadShaderByGuid(new GUID(k_SpecularShaderGuid));
-#else
                 s_SpecularShader = LoadShaderByName(SpecularShader);
-#endif
                 s_SpecularShaderQueried = true;
             }
             return s_SpecularShader;
@@ -582,17 +571,9 @@ namespace GLTFast.Materials {
         }
 #endif
 
-        protected Shader LoadShaderByName(string shaderName) {
-#if UNITY_EDITOR
-            var shaderPath = $"{k_ShaderPathPrefix}{shaderName}.shadergraph";
-            var shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderPath);
-            if (shader == null) {
-                Logger?.Error($"Cannot load shader at path {shaderPath}");
-            }
-            return shader;
-#else
-            return FindShader($"{k_ShaderGraphsPrefix}{shaderName}", Logger);
-#endif
+        protected Shader LoadShaderByName(string shaderName) 
+        {
+            return FindShader($"Shader Graphs/{shaderName}", Logger);
         }
 
         protected virtual void SetDoubleSided(MaterialBase gltfMaterial, Material material) {

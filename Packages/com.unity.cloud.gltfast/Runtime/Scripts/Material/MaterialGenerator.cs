@@ -82,7 +82,7 @@ namespace GLTFast.Materials
         public static readonly int BaseColorProperty = MaterialProperty.BaseColor;
         /// <inheritdoc cref="MaterialProperty.BaseColorTexture"/>
         [Obsolete("Use MaterialProperty.BaseColorTexture instead.")]
-        public static readonly int BaseColorTextureProperty = MaterialProperty.BaseColorTexture;
+        public static readonly int BaseColorTextureProperty = Shader.PropertyToID(MaterialProperty.BaseColorTexture);
         /// <inheritdoc cref="MaterialProperty.BaseColorTextureRotation"/>
         [Obsolete("Use MaterialProperty.BaseColorTextureRotation instead.")]
         public static readonly int BaseColorTextureRotationProperty = MaterialProperty.BaseColorTextureRotation;
@@ -106,7 +106,7 @@ namespace GLTFast.Materials
         public static readonly int DiffuseFactorProperty = MaterialProperty.DiffuseFactor;
         /// <inheritdoc cref="MaterialProperty.DiffuseTexture" />
         [Obsolete("Use MaterialProperty.DiffuseTexture instead.")]
-        public static readonly int DiffuseTextureProperty = MaterialProperty.DiffuseTexture;
+        public static readonly int DiffuseTextureProperty = Shader.PropertyToID(MaterialProperty.DiffuseTexture);
         /// <inheritdoc cref="MaterialProperty.DiffuseTextureScaleTransform" />
         [Obsolete("Use MaterialProperty.DiffuseTextureScaleTransform instead.")]
         public static readonly int DiffuseTextureScaleTransformProperty = MaterialProperty.DiffuseTextureScaleTransform;
@@ -121,7 +121,7 @@ namespace GLTFast.Materials
         public static readonly int EmissiveFactorProperty = MaterialProperty.EmissiveFactor;
         /// <inheritdoc cref="MaterialProperty.EmissiveTexture" />
         [Obsolete("Use MaterialProperty.EmissiveTexture instead.")]
-        public static readonly int EmissiveTextureProperty = MaterialProperty.EmissiveTexture;
+        public static readonly int EmissiveTextureProperty = Shader.PropertyToID(MaterialProperty.EmissiveTexture);
         /// <inheritdoc cref="MaterialProperty.EmissiveTextureRotation" />
         [Obsolete("Use MaterialProperty.EmissiveTextureRotation instead.")]
         public static readonly int EmissiveTextureRotationProperty = MaterialProperty.EmissiveTextureRotation;
@@ -136,7 +136,7 @@ namespace GLTFast.Materials
         public static readonly int GlossinessFactorProperty = MaterialProperty.GlossinessFactor;
         /// <inheritdoc cref="MaterialProperty.NormalTexture" />
         [Obsolete("Use MaterialProperty.NormalTexture instead.")]
-        public static readonly int NormalTextureProperty = MaterialProperty.NormalTexture;
+        public static readonly int NormalTextureProperty = Shader.PropertyToID(MaterialProperty.NormalTexture);
         /// <inheritdoc cref="MaterialProperty.NormalTextureRotation" />
         [Obsolete("Use MaterialProperty.NormalTextureRotation instead.")]
         public static readonly int NormalTextureRotationProperty = MaterialProperty.NormalTextureRotation;
@@ -154,7 +154,7 @@ namespace GLTFast.Materials
         public static readonly int MetallicProperty = MaterialProperty.Metallic;
         /// <inheritdoc cref="MaterialProperty.MetallicRoughnessMap" />
         [Obsolete("Use MaterialProperty.MetallicRoughnessMap instead.")]
-        public static readonly int MetallicRoughnessMapProperty = MaterialProperty.MetallicRoughnessMap;
+        public static readonly int MetallicRoughnessMapProperty = Shader.PropertyToID(MaterialProperty.MetallicRoughnessMap);
         /// <inheritdoc cref="MaterialProperty.MetallicRoughnessMapScaleTransform" />
         [Obsolete("Use MaterialProperty.MetallicRoughnessMapScaleTransform instead.")]
         public static readonly int MetallicRoughnessMapScaleTransformProperty = MaterialProperty.MetallicRoughnessMapScaleTransform;
@@ -166,7 +166,7 @@ namespace GLTFast.Materials
         public static readonly int MetallicRoughnessMapUVChannelProperty = MaterialProperty.MetallicRoughnessMapTexCoord;
         /// <inheritdoc cref="MaterialProperty.OcclusionTexture" />
         [Obsolete("Use MaterialProperty.OcclusionTexture instead.")]
-        public static readonly int OcclusionTextureProperty = MaterialProperty.OcclusionTexture;
+        public static readonly int OcclusionTextureProperty = Shader.PropertyToID(MaterialProperty.OcclusionTexture);
         /// <inheritdoc cref="MaterialProperty.OcclusionTextureStrength" />
         [Obsolete("Use MaterialProperty.OcclusionTextureStrength instead.")]
         public static readonly int OcclusionTextureStrengthProperty = MaterialProperty.OcclusionTextureStrength;
@@ -187,7 +187,7 @@ namespace GLTFast.Materials
         public static readonly int SpecularFactorProperty = MaterialProperty.SpecularFactor;
         /// <inheritdoc cref="MaterialProperty.SpecularGlossinessTexture" />
         [Obsolete("Use MaterialProperty.SpecularGlossinessTexture instead.")]
-        public static readonly int SpecularGlossinessTextureProperty = MaterialProperty.SpecularGlossinessTexture;
+        public static readonly int SpecularGlossinessTextureProperty = Shader.PropertyToID(MaterialProperty.SpecularGlossinessTexture);
         /// <inheritdoc cref="MaterialProperty.SpecularGlossinessTextureScaleTransform" />
         [Obsolete("Use MaterialProperty.SpecularGlossinessTextureScaleTransform instead.")]
         public static readonly int SpecularGlossinessTextureScaleTransformProperty = MaterialProperty.SpecularGlossinessTextureScaleTransform;
@@ -324,7 +324,7 @@ namespace GLTFast.Materials
             TextureInfoBase textureInfo,
             UnityEngine.Material material,
             IGltfReadable gltf,
-            int texturePropertyId,
+            string texturePropertyId,
             int scaleTransformPropertyId = -1,
             int rotationPropertyId = -1,
             int uvChannelPropertyId = -1
@@ -339,6 +339,8 @@ namespace GLTFast.Materials
                     var texture = gltf.GetTexture(textureIndex);
                     if (texture != null)
                     {
+                        Debug.Log("Trying to set texture with Id: " + texturePropertyId);
+
                         material.SetTexture(texturePropertyId, texture);
                         // TODO: Implement texture transform and UV channel selection for all texture types and remove
                         // this condition
@@ -376,7 +378,7 @@ namespace GLTFast.Materials
         void TrySetTextureTransform(
             TextureInfoBase textureInfo,
             UnityEngine.Material material,
-            int texturePropertyId,
+            string texturePropertyId,
             int scaleTransformPropertyId = -1,
             int rotationPropertyId = -1,
             int uvChannelPropertyId = -1,

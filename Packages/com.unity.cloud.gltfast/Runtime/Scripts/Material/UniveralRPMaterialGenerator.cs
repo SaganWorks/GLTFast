@@ -25,12 +25,6 @@ namespace GLTFast.Materials {
         static bool s_SupportsCameraOpaqueTexture;
 
 #if USING_URP_12_OR_NEWER
-#if UNITY_EDITOR
-        /// <summary>Guid of the shader graph with clearcoat support</summary>
-        const string k_MetallicClearcoatShaderGuid = "c18c97ae1ce021b4980c5d19a54f0d3c";
-#endif
-        /// <summary>Name of the shader graph with clearcoat support</summary>
-        public const string MetallicClearcoatShader = "glTF-pbrMetallicRoughness-Clearcoat";
 
         static bool s_MetallicClearcoatShaderQueried;
         static Shader s_MetallicClearcoatShader;
@@ -80,16 +74,8 @@ namespace GLTFast.Materials {
             {
                 if (!s_MetallicClearcoatShaderQueried)
                 {
-#if UNITY_EDITOR
-                    s_MetallicClearcoatShader = LoadShaderByGuid(new GUID(k_MetallicClearcoatShaderGuid));
-#else
-                    s_MetallicClearcoatShader = LoadShaderByName(MetallicClearcoatShader);
-#endif
-                    if (s_MetallicClearcoatShader == null)
-                    {
-                        // Fallback to regular shader graph
-                        s_MetallicClearcoatShader = base.GetMetallicShader(features);
-                    }
+                    // Use regular metallic shader
+                    s_MetallicClearcoatShader = base.GetMetallicShader(features);
                     s_MetallicClearcoatShaderQueried = true;
                 }
                 return s_MetallicClearcoatShader;

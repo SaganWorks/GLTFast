@@ -58,7 +58,9 @@ namespace GLTFast
                 bounds = boundsOpt.Value;
                 return true;
             }
-            m_GltfImport.Logger?.Error(LogCode.MeshBoundsMissing, m_Attributes[subMesh].POSITION.ToString());
+
+            // Changed from an Error log to a Warning log - don't be so dramatic
+            m_GltfImport.Logger?.Warning(LogCode.MeshBoundsMissing, m_Attributes[subMesh].POSITION.ToString());
             bounds = default;
             return false;
         }

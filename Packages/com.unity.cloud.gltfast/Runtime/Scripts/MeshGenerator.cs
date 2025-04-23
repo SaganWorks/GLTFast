@@ -64,6 +64,11 @@ namespace GLTFast
 
             var mainBufferType = GetMainBufferType(gltfImport, out hasNormals, out hasTangents);
 
+            if (mainBufferType == (MainBufferType.Position | MainBufferType.Tangent))
+            {
+                mainBufferType = MainBufferType.Position;
+            }
+
             switch (mainBufferType)
             {
                 case MainBufferType.Position:

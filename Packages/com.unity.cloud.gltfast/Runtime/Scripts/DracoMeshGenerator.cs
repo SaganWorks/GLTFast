@@ -195,10 +195,11 @@ namespace GLTFast {
             {
                 flags |= DecodeSettings.RequireNormals;
             }
-            if (m_MorphTargetsGenerator != null)
-            {
-                flags |= DecodeSettings.ForceUnityVertexLayout;
-            }
+            // Quantized attributes (e.g. UVs) can decode to a non-Float32 layout that
+            // downstream mesh-building code can't read, causing "Unsupported conversion
+            // of vertex data" errors. Force the compatible layout unconditionally, not
+            // just when morph targets are present.
+            flags |= DecodeSettings.ForceUnityVertexLayout;
 
             return await DracoDecoder.DecodeMesh(data, flags, GenerateAttributeIdMap(dracoAttributes));
         }

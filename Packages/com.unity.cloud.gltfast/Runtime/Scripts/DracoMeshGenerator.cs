@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Draco;
 using GLTFast.Logging;
 using GLTFast.Schema;
@@ -33,15 +34,12 @@ namespace GLTFast {
             )
             : base(meshName)
         {
-            // TODO: Add support for decoding multiple primitives into one mesh with sub-meshes.
-            Assert.IsTrue(
-                primitives.Count == 1,
-                "Draco-compressed, multi primitives/sub-mesh meshes are not supported."
-                );
-
+            // subMeshAssignments is MeshGenerator's index-buffer-splitting mechanism (for meshes
+            // exceeding the 16-bit index limit) — unrelated to multiple KHR_draco_mesh_compression
+            // primitives merging into sub-meshes, which Decode() below does support.
             Assert.IsNull(
                 subMeshAssignments,
-                "Draco-compressed, multi primitives/sub-mesh meshes are not supported."
+                "Draco-compressed meshes requiring index-buffer-splitting sub-mesh assignment are not supported."
                 );
 
             var morphTargets = primitives[0].targets;
@@ -135,13 +133,23 @@ namespace GLTFast {
 
         async Task<Mesh> Decode(IReadOnlyList<MeshPrimitiveBase> primitives, IGltfBuffers buffers)
         {
-            Mesh mesh = null;
+            // One buffer + attribute map per primitive, decoded together into a single mesh
+            // with one sub-mesh per primitive. Decoding primitives one at a time here and
+            // keeping only the last result silently dropped every earlier primitive's geometry
+            // while sub-mesh/vertex-count bookkeeping (computed from ALL primitives, above)
+            // stayed as if it hadn't been — sub-meshes ended up indexing into a vertex buffer
+            // that only actually held the last primitive's data.
+            var encodedBuffers = new List<NativeArray<byte>.ReadOnly>(primitives.Count);
+            var attributeIdMaps = new List<Dictionary<VertexAttribute, int>>(primitives.Count);
             foreach (var primitive in primitives)
             {
                 var dracoExt = primitive.Extensions.KHR_draco_mesh_compression;
                 var buffer = buffers.GetBufferView(dracoExt.bufferView, out _);
-                mesh = await StartDecode(buffer, dracoExt.attributes);
+                encodedBuffers.Add(AsNativeArrayReadOnly(buffer));
+                attributeIdMaps.Add(GenerateAttributeIdMap(dracoExt.attributes));
             }
+
+            var mesh = await StartDecode(encodedBuffers, attributeIdMaps);
 
             if (mesh is null) {
                 return null;
@@ -184,7 +192,10 @@ namespace GLTFast {
             return mesh;
         }
 
-        async Task<Mesh> StartDecode(NativeSlice<byte> data, Attributes dracoAttributes)
+        async Task<Mesh> StartDecode(
+            IReadOnlyList<NativeArray<byte>.ReadOnly> data,
+            IReadOnlyList<Dictionary<VertexAttribute, int>> attributeIdMaps
+            )
         {
             var flags = DecodeSettings.ConvertSpace;
             if (m_NeedsTangents)
@@ -201,7 +212,23 @@ namespace GLTFast {
             // just when morph targets are present.
             flags |= DecodeSettings.ForceUnityVertexLayout;
 
-            return await DracoDecoder.DecodeMesh(data, flags, GenerateAttributeIdMap(dracoAttributes));
+            return await DracoDecoder.DecodeMesh(data, flags, attributeIdMaps);
+        }
+
+        // Draco-for-Unity has the equivalent conversion (NativeSliceExtensions.AsNativeArray), but
+        // that type is internal to its own assembly and not visible here. Zero-copy reinterpretation
+        // of the slice's existing memory as a NativeArray, same as that internal implementation.
+        static unsafe NativeArray<byte>.ReadOnly AsNativeArrayReadOnly(NativeSlice<byte> slice)
+        {
+            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(
+                slice.GetUnsafeReadOnlyPtr(),
+                slice.Length,
+                Allocator.None
+                );
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.Create());
+#endif
+            return array.AsReadOnly();
         }
 
         static Dictionary<VertexAttribute, int> GenerateAttributeIdMap(Attributes attributes)
